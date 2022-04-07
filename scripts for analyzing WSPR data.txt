@@ -1,0 +1,32 @@
+# necessary libraries
+library(jsonlite)
+library(httr)
+require(dplyr)
+
+# API call for local sunrise/sunset
+latx = 34
+logx = -118
+dt = ????
+apiURL <- "https://api.sunrise-sunset.org/json?"
+apiCall <- paste(apiURL, 'lat=',latx,'&long=',longx,'&date=',dt,sep="")
+SunTimes <- GET(url = apiCall)
+
+# input data for 31 meters - assumes python script has split monthly WSPR data by band
+fileName31 <- "C:\\Users\\vleveque\\Downloads\\wsprspots-2021-12_10.csv"
+ThirtyOneMeters <- read.table(file = fileName, header = FALSE, sep=",")
+colnames(ThirtyOneMeters ) <- c("spot_id", "Timestamp", "Reporter", "Reporter_Grid", "SNR", "Frequency", "Transmitter_Call_sign", "Grid", "Power", "Drift", "Distance", "Azimuth", "Band", "WSPR_Version")
+SoCal31 <- ThirtyOneMeters[substr(ThirtyOneMeters$V8,1,4) %in% c('DM04','DM05', 'DM03', 'DM12', 'DM13', 'DM14', 'DM15', 'CM04', 'CM05'), ]
+# Add hour column
+SoCal31$hour <- hour_time(SoCal31$V2)
+
+#input data for 15 meters - assumes python script has split monthly WSPR data by band
+fileName15 <- "C:\\Users\\vleveque\\Downloads\\wsprspots-2021-12_21.csv"
+fifteenMeters <- read.table(file = fileName, header = FALSE, sep=",")
+colnames(fifteenMeters) <- c("spot_id", "Timestamp", "Reporter", "Reporter_Grid", "SNR", "Frequency", "Transmitter_Call_sign", "Grid", "Power", "Drift", "Distance", "Azimuth", "Band", "WSPR_Version")
+SoCal15 <- fifteenMeters[substr(fifteenMeters$Grid,1,4) %in% c('DM04','DM05', 'DM03', 'DM12', 'DM13', 'DM14', 'DM15', 'CM04', 'CM05'), ]
+SoCal15$hour <- hour_time(SoCal15$Timestamp)
+
+#get stats on station pairs
+SoCal15["rep_tran"] <- paste(SoCal15$Reporter, SoCal15$Transmitter_Call_sign)
+sort(count(SoCal15, "rep_tran"), decreasing = TRUE)
+rep_tran_count <- count(SoCal15, "rep_tran")
