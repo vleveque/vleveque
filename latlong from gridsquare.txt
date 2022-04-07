@@ -1,0 +1,55 @@
+hour_time <- function(utime)
+{ t1 <- as.POSIXct(utime, origin="1970-01-01")
+h1 <- format(t1,format='%H')
+h1x <- as.numeric(h1)
+m1 <- format(t1,format='%M')
+m1x <- as.numeric(m1)
+hourMin <- h1x + (m1x/60)
+return(hourMin)}
+
+#following dos not work as a function, may be type error
+
+t1 <- as.POSIXct(utime, origin="1970-01-01")
+dt <- format(t1,format='%Y-%m-%d')
+
+
+
+grid2long <- function(grid)
+ {c1 <- substr(grid,start=1,stop=1) 
+ c1 <- charToRaw(c1)
+ c1x <- as.numeric(c1)
+ c1x <- 20*(c1x-65)
+ c3 <- substr(grid,start=3,stop=3)
+ c3x <- as.numeric(c3)
+ c3x <- c3x*2
+ long <- c1x+c3x-180
+ return(long)}
+
+grid2lat <- function(grid)
+{c2 <- substr(grid,start=2,stop=2)
+ c2 <- charToRaw(c2)
+ c2x <- as.numeric(c2)
+ c2x <- 10*(c2x-65)
+ c4 <- substr(grid,start=4,stop=4)
+ c4x <- as.numeric(c4)
+ lat <- c2x+c4x-90
+return(lat)}
+
+#Use Web API to get local sunrise/sunset times in UTC
+sunTimes <- function(lat,long,date)
+{
+URI <- paste("https://api.sunrise-sunset.org/json?lat=",lat,"&lng=",long,"&date=",date,sep=
+'')
+#URI <- "https://api.sunrise-sunset.org/json?lat=36.7201600&lng=-4.4203400&date=2022-02-14"
+sunData <- GET(URI)
+sunJSON <- fromJSON(rawToChar(sunData$content))
+sunrise <- sunJSON$results$sunrise
+sunset <- sunJSON$results$sunset
+r <- c(sunrise,sunset)
+return(r)}
+
+
+# add longitude to WSPR data
+for (i in 1:nrow(FortyMeter)) {print(grid2long(FortyMeter[i,4]))}
+
+reply+6da8c3dc35a34035ae3332a49e406d34@messaging.yelp.com
